@@ -8,6 +8,7 @@
 #include <Servo.h> 
  
 #define LED_PIN 13
+#define SERVO_A_PIN 9
  
 Servo myservo;  // create servo object to control a servo 
                 // a maximum of eight servo objects can be created 
@@ -16,7 +17,7 @@ int pos = 0;    // variable to store the servo position
  
 void setup() 
 { 
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object 
+  myservo.attach(SERVO_A_PIN);  // attaches the servo on pin 9 to the servo object 
   Serial.begin(9600);
   digitalWrite(LED_PIN, LOW);
   //Serial.println("Enter the servo position in degrees (0 - 180), followed by a period.");

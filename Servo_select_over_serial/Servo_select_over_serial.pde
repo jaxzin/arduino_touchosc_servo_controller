@@ -11,11 +11,19 @@
 #define SERVO_A_PIN 9
 #define SERVO_B_PIN 10
  
+#define STATE_WAITING 0 // waiting for input
+#define STATE_READ_A  1 // currently reading the value for servo a
+#define STATE_READ_B  2 // currently reading the value for servo b
+#define STATE_UPDATE_A  3  // done reading value for servo a, ready to update
+#define STATE_UPDATE_B  4  // done reading value for servo b, ready to update
+
 Servo myservoA;  // create servo object to control a servo 
                 // a maximum of eight servo objects can be created 
 Servo myservoB; 
  
-int pos = 0;    // variable to store the servo position 
+int state = STATE_WAITING;
+int posA = 0;    // variable to store the servo position 
+int posB = 0;    // variable to store the servo position 
  
 void setup() 
 { 
@@ -29,51 +37,48 @@ void setup()
  
 void loop() 
 { 
-  boolean update = false;
   while(Serial.available() > 0) {
     byte temp = Serial.read();
-    if(temp == '.') {
-      update = true;
+    // 'a' signifies the start of data for servo A
+    if(temp == 'a') {
+      state = STATE_READ_A;
+    // 'b' signifies the start of data for servo A
+    } else if(temp == 'b') {
+      state = STATE_READ_B;
+    } else if(temp == '.') {
+      // transistion state to update whichever value we've been reading
+      state = STATE_READ_A ? STATE_UPDATE_A : STATE_UPDATE_B;
       break;
+    } else if(state == STATE_READ_A) {
+      posA *= 10; // shift the currently stored position
+      posA += (temp - '0'); // Add the new digit;
+    } else if(state == STATE_READ_B) {
+      posB *= 10; // shift the currently stored position
+      posB += (temp - '0'); // Add the new digit;
     } else {
-      pos *= 10; // shift the currently stored position
-      pos += (temp - '0'); // Add the new digit;
+      // TODO: Warn about reading data outside of a/b context
     }
   }
 
-  if(update && pos >= 0 && pos <= 180) {
-    int temp = map(pos, 0, 180, 550, 2300); // Map degrees (0-180) to Futaba servo microseconds...
-    myservoA.writeMicroseconds(temp);
-    myservoB.writeMicroseconds(temp);
-    //Serial.print("Moving to position ");
-    //Serial.println(pos, DEC);
-    pos = 0;
+  if(state == STATE_UPDATE_A && posA >= 0 && posA <= 180) {
+    updateServo(myservoA, posA);
+    posA = 0;
+    state = STATE_WAITING;
     
     // Blink LED as a sign of movement, twice over a quarter-second
     //blinkLed(LED_PIN, 2, 250);
   }
-  // Warn on invalid data
-  else if(update) {
-    //Serial.print("Invalid position [");
-    //Serial.print(pos, DEC);
-    //Serial.println("]. Please enter a position between 0 and 180 degrees");
-    pos = 0;
+  else if(state == STATE_UPDATE_B && posB >= 0 && posB <= 180) {
+    updateServo(myservoB, posB);
+    posB = 0;
+    state = STATE_WAITING;
   }
+  // TODO: Warn about invalid position data
+
+
 }
 
-void blinkLed(int pin, int times, int duration) {
-  // The length of being on or off (total duration devided by the number of blinks + spaces in between)
-  int pulseDuration = duration / ((times * 2) - 1);
-  
-  for(int i = 0; i < times; i++) {
-    digitalWrite(pin, HIGH);
-    delay(pulseDuration);
-    digitalWrite(pin, LOW);
-    // if its not the last blink...
-    if(i != times - 1) {
-      delay(pulseDuration);
-    }
-  }
-  
+void updateServo(Servo servo, int pos) {
+    int temp = map(pos, 0, 180, 550, 2300); // Map degrees (0-180) to Futaba servo microseconds...
+    servo.writeMicroseconds(temp);
 }
-

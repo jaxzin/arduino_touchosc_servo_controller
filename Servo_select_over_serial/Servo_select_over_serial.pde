@@ -47,7 +47,7 @@ void loop()
       state = STATE_READ_B;
     } else if(temp == '.') {
       // transistion state to update whichever value we've been reading
-      state = STATE_READ_A ? STATE_UPDATE_A : STATE_UPDATE_B;
+      state = state == STATE_READ_A ? STATE_UPDATE_A : STATE_UPDATE_B;
       break;
     } else if(state == STATE_READ_A) {
       posA *= 10; // shift the currently stored position

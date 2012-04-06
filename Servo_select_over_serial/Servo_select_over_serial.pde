@@ -9,15 +9,18 @@
  
 #define LED_PIN 13
 #define SERVO_A_PIN 9
+#define SERVO_B_PIN 10
  
-Servo myservo;  // create servo object to control a servo 
+Servo myservoA;  // create servo object to control a servo 
                 // a maximum of eight servo objects can be created 
+Servo myservoB; 
  
 int pos = 0;    // variable to store the servo position 
  
 void setup() 
 { 
-  myservo.attach(SERVO_A_PIN);  // attaches the servo on pin 9 to the servo object 
+  myservoA.attach(SERVO_A_PIN);  // attaches the servo on pin 9 to the servo object 
+  myservoB.attach(SERVO_B_PIN);  // attaches the servo on pin 10 to the servo object 
   Serial.begin(9600);
   digitalWrite(LED_PIN, LOW);
   //Serial.println("Enter the servo position in degrees (0 - 180), followed by a period.");
@@ -40,7 +43,8 @@ void loop()
 
   if(update && pos >= 0 && pos <= 180) {
     int temp = map(pos, 0, 180, 550, 2300); // Map degrees (0-180) to Futaba servo microseconds...
-    myservo.writeMicroseconds(temp);
+    myservoA.writeMicroseconds(temp);
+    myservoB.writeMicroseconds(temp);
     //Serial.print("Moving to position ");
     //Serial.println(pos, DEC);
     pos = 0;

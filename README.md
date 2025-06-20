@@ -1,7 +1,7 @@
 Arduino / TouchOSC controller of a servo
 ===================
 
-A simple project that controls the position of a servo via an on-screen rotary dial for an iOS device.
+A simple project that controls the position of two servos via on-screen rotary dials for an iOS device.
 
 Requirements
 -------
